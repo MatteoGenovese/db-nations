@@ -78,17 +78,15 @@ public class Main {
 		
 		try(Connection con = DriverManager.getConnection(URL, USER, PASSWORD);) {
 			
-			final String sql = "SELECT * "
-								+" FROM countries"
-								+" JOIN regions"
-								+" ON countries.region_id = regions.region_id "
-								+" JOIN continents "
-								+" ON regions.continent_id = continents.continent_id "
-								+" JOIN country_languages "
-								+" ON country_languages.country_id = countries.country_id "
-								+" JOIN languages "
-								+" ON country_languages.language_id = languages.language_id "
-								+" WHERE countries.country_id = ? && country_stats.year=2020";
+			final String sql = "SELECT countries.name , languages.`language`, country_stats.`year` , country_stats.population, country_stats.gdp   \n"
+					+ "FROM countries\n"
+					+ "JOIN country_languages\n"
+					+ "ON countries.country_id =country_languages.country_id \n"
+					+ "JOIN languages\n"
+					+ "ON country_languages.language_id = languages.language_id\n"
+					+ "JOIN country_stats\n"
+					+ "ON countries.country_id = country_stats.country_id\n"
+					+ "WHERE countries.country_id = ? && country_stats.`year`=2018";
 			
 			try(PreparedStatement ps = con.prepareStatement(sql)){
 				
@@ -96,19 +94,39 @@ public class Main {
 
 				try(ResultSet rs =	ps.executeQuery()){
 					
+
+					
 					while (rs.next()) {
-						final int id = rs.getInt(1);
-						final String country = rs.getString(2);
-						final String region = rs.getString(3);
-						final String continent =rs.getString(4);
 						
-						System.out.println(
-								"Details for country: "
-								+ id+ " - "
-								+ country + " - "
-								+ region + " - "
-								+ continent + " - "
-								);
+						if(rs.isFirst())
+							
+						{
+							String country = rs.getString(1);
+							
+							System.out.println(	"Details for country: "+ country);
+							System.out.println(	"Languages: ");
+							
+						}
+
+						final String language = rs.getString(2);
+
+						if(!rs.isLast())
+							System.out.print(language+", ");
+						if(rs.isLast())
+						{
+							System.out.println(language+".");
+							System.out.println("Most recent stats:");
+							
+							final String year =rs.getString(3);
+							final String population =rs.getString(4);
+							final String gdp =rs.getString(5);
+							
+							System.out.println("Year: "+year);
+							System.out.println("Population: "+population);
+							System.out.println("GDP: "+gdp);
+									
+							
+						}
 						
 					}
 				}
